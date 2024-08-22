@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+</head>
+<body>
+    {% if success %}
+        <p>{{ success }}</p>
+    {% elif error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <form action="/attendance" method="POST">
+            <input type="submit" value="Mark Attendance">
+        </form>
+    {% endif %}
+</body>
+</html>

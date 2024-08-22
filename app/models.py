@@ -7,12 +7,12 @@ class User(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(10), nullable=False, default='staff')
     first_name = db.Column(db.String(100), nullable=False)  
     last_name = db.Column(db.String(1000), nullable=False)   
     department = db.Column(db.String(100), nullable=True) 
-    created_at = db.Column(db.DateTime, default=datetime.now(datetime))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -26,6 +26,7 @@ class Attendance(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user = db.relationship('User', backref='attendances')
     
