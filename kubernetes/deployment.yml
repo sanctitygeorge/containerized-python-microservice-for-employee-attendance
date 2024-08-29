@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: attendance-microservice-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: attendance-microservice
+  template:
+    metadata:
+      labels:
+        app: attendance-microservice
+    spec:
+      containers:
+      - name: attendance-microservice-container
+        image: sanctitygeorge/attendance-microservice:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_CONNECTION_STRING
+          value: "Database-Connection-String"

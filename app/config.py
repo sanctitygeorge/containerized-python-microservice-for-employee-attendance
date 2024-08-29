@@ -1,19 +1,13 @@
-# for configuration settings
-#import os
-
+import os
 from datetime import timedelta
 import urllib
 
-params = urllib.parse.quote_plus(
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=server name;"
-    "DATABASE=database name;"
-    "UID=username;"
-    "PWD=password;"
-    "Encrypt=yes;"
-    "TrustServerCertificate=no;"
-    "Connection Timeout=30;"
-)
+# Retrieve the connection string from the environment variable
+connection_string = os.getenv('DB_CONNECTION_STRING')
+#print(connection_string)
+
+# URL encode the connection string
+params = urllib.parse.quote_plus(connection_string)
 
 # Add Configurations
 class Config:
@@ -22,6 +16,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = 'JWT_SECRET_KEY'
 
-#  Add the JWT token location
+    # Add the JWT token location
     JWT_TOKEN_LOCATION = ['headers']  # Specifies that tokens are expected in headers
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)  # Optional: Set token expiration time
