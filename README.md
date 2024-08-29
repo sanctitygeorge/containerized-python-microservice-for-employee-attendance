@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed on your local machine:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/staff-attendance-app.git
+   git clone https://github.com/sanctitygeorge/user-attendance-microservice-api.git
    cd staff-attendance-app
    ```
 
