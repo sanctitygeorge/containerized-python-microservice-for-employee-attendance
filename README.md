@@ -1,4 +1,4 @@
-#  User Registration & Attendance Microservice
+#  User Attendance Microservice API
 
 This repository contains a Python-based web application for staff attendance management. The application features staff registration, login, attendance marking, and an admin dashboard for managing staff and viewing attendance records. This README provides instructions for setting up, developing, containerizing, and deploying the application.
 
@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed on your local machine:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/staff-attendance-app.git
+   git clone https://github.com/sanctitygeorge/user-attendance-microservice-api.git
    cd staff-attendance-app
    ```
 
