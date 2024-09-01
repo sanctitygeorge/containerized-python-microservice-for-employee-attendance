@@ -1,3 +1,4 @@
+#Excluded sensitive files
 venv/
 .env
 terraform_service_principal.json
