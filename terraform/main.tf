@@ -1,10 +1,10 @@
 resource "azurerm_resource_group" "rg" {
-  name     = "AttendanceApp-RG"
+  name     = "attendanceApp-RG"
   location = "East US"
 }
 
 resource "azurerm_container_registry" "acr" {
-  name                = "AttendanceApp-Registry"
+  name                = "attendanceApp-Registry"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Standard"
@@ -12,7 +12,7 @@ resource "azurerm_container_registry" "acr" {
 }
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "AttendanceApp-AKSCluster"
+  name                = "attendanceApp-AKSCluster"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   dns_prefix          = "attendanceapp-akscluster"
