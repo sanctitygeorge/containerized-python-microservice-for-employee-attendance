@@ -23,6 +23,8 @@ jobs:
           echo "machine dev.azure.com login $(AZURE_DEVOPS_TOKEN) password x" > ~/.netrc
           
       - name: Sync to Azure Repos
-        run: git push azure main
+        run: |
+          git fetch azure
+          git push azure main
         env:
           AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
