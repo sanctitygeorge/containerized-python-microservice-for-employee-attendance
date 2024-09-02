@@ -1,18 +1,18 @@
-name: Trigger Azure DevOps Pipeline
+name: Sync to Azure Repos
 
 on:
   push:
     branches:
-      - main # Change this to the branch you want to trigger the action on
+      - main
 
 jobs:
-  trigger-azure-pipeline:
+  sync:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Trigger Azure DevOps Pipeline
-      uses: Azure/pipelines@v1
-      with:
-        azure-devops-project-url: 'https://dev.azure.com/mytekglobe/Agile%20Project' # Replace with your Azure DevOps project URL
-        azure-pipeline-name: 'user-attendance-microservice-api' # Replace with the name of the Azure pipeline to be triggered
-        azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}' # Use the secret you created in GitHub
+      - uses: actions/checkout@v3
+      - name: Sync to Azure Repos
+        run: |
+          git remote add azure https://dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api
+          git push azure main
+        env:
+          AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
