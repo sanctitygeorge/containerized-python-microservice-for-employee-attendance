@@ -16,7 +16,12 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git remote add azure https://dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api
-          git remote set-url azure https://$(AZURE_DEVOPS_TOKEN)@dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api
+          git config --global credential.helper store
+        env:
+          AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+
+      - name: Store Azure DevOps Token
+        run: echo "https://$(AZURE_DEVOPS_TOKEN)@dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api" > ~/.git-credentials
       
       - name: Sync to Azure Repos
         run: |
