@@ -11,9 +11,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Git for Azure Repos
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Add Azure remote repository
+          git remote add azure https://dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api
+
+          # Store credentials for the Azure repository
+          echo "https://$(AZURE_REPOS_TOKEN):x@dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api" > ~/.git-credentials
+          
       - name: Sync to Azure Repos
-        uses: andrewd48/git-remote-gc@v1
-        with:
-          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-          azure-repo-url: 'https://dev.azure.com/mytekglobe/Agile%20Project/_git/user-attendance-microservice-api'
-          branch: 'main'
+        run: |
+          git fetch azure
+          git push azure main
+        env:
+          AZURE_REPOS_TOKEN: ${{ secrets.AZURE_REPOS_TOKEN }}
