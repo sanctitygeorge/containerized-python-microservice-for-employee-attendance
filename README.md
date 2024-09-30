@@ -1,220 +1,166 @@
-#  User Attendance Microservice API
+# User Attendance Microservice API
 
-This repository contains a Python-based web application for staff attendance management. The application features staff registration, login, attendance marking, and an admin dashboard for managing staff and viewing attendance records. This README provides instructions for setting up, developing, containerizing, and deploying the application.
+The **User Attendance Microservice API** is a Python-based web application designed for managing staff attendance, providing features for staff registration, attendance marking, and an admin dashboard for managing staff. The application is containerized using Docker and deployed to Azure Kubernetes Service (AKS) through Azure DevOps CI/CD pipelines.
 
 ## Table of Contents
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Running Locally](#running-locally)
+- [Deployment](#deployment)
+  - [Docker](#docker)
+  - [Kubernetes](#kubernetes)
+  - [CI/CD with Azure DevOps](#ci/cd-with-azure-devops)
+- [Infrastructure](#infrastructure)
+- [Environment Variables](#environment-variables)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-- [Prerequisites](#prerequisites)
-- [Setup and Development](#setup-and-development)
-- [Containerization](#containerization)
-- [Deployment to Kubernetes](#deployment-to-kubernetes)
-- [Monitoring](#monitoring)
-- [Troubleshooting](#troubleshooting)
+## Features
+- **User Registration**: New staff members can register via a browser form.
+- **Login & Attendance Marking**: Staff can log in and mark their attendance.
+- **Admin Dashboard**: Admin users can view attendance records and manage staff.
+- **REST API**: Exposes endpoints for integration with other services.
+- **Security & Robustness**: Secured application with Azure best practices.
 
-## Prerequisites
+## Architecture
 
-Before you begin, ensure you have the following installed on your local machine:
+This application follows a microservice architecture with the following components:
+- **Python Flask Application**: For managing the backend logic.
+- **Docker**: Containerization of the application.
+- **Azure Kubernetes Service (AKS)**: Orchestrates containers in production.
+- **Azure DevOps**: For CI/CD, automating the build, testing, and deployment pipelines.
 
-- [Python 3.8+](https://www.python.org/downloads/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) with Kubernetes enabled
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (for Azure deployment)
-- [Azure DevOps](https://azure.microsoft.com/en-us/services/devops/) (for CI/CD pipeline)
+Below is a simplified diagram of the deployment workflow:
 
-## Setup and Development
+![Workflow Diagram](path/to/your/simplified-diagram.png)
+![image](https://github.com/user-attachments/assets/a8fe1038-c8d5-4da3-ae22-45e7972a6044)
 
-1. **Clone the Repository:**
 
+## Tech Stack
+- **Language**: Python 3.11
+- **Framework**: Flask
+- **Database**: Azure SQL Database
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes (AKS)
+- **CI/CD**: Azure DevOps
+- **Monitoring**: Prometheus, Grafana, DataDog (optional)
+
+## Installation
+
+### Prerequisites
+- Python 3.11
+- Docker
+- Azure CLI
+- Kubernetes CLI (kubectl)
+- Terraform (for infrastructure as code)
+  
+### Cloning the Repository
+```bash
+git clone https://github.com/your-username/user-attendance-microservice-api.git
+cd user-attendance-microservice-api
+```
+
+## Running Locally
+
+1. Create a `.env` file in the root of the project with the following environment variables:
    ```bash
-   git clone https://github.com/sanctitygeorge/user-attendance-microservice-api.git
-   cd staff-attendance-app
+   DB_CONNECTION_STRING=your_db_connection_string
    ```
 
-2. **Create a Virtual Environment:**
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
-
-3. **Install Dependencies:**
-
+2. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set Up Environment Variables:**
-
-   Create a `.env` file in the root directory and add your environment variables:
-
-   ```
-   DB_CONNECTION_STRING="DRIVER={ODBC Driver 18 for SQL Server};SERVER=your-server;DATABASE=your-db;UID=your-username;PWD=your-password;"
-   ```
-
-5. **Run the Application Locally:**
-
+3. Start the application:
    ```bash
    python run.py
    ```
 
-   The application should now be accessible at `http://localhost:5000`.
+4. Navigate to `http://localhost:5000` in your browser.
 
-## Containerization
+## Deployment
 
-1. **Create a Dockerfile:**
+### Docker
+To build and run the application inside a Docker container:
+```bash
+docker build -t attendance-microservice .
+docker run -p 5000:5000 attendance-microservice
+```
 
-   Ensure your `Dockerfile` is in the root project directory and looks like this:
-
-   ```Dockerfile
-   # Use an official Python runtime as a parent image
-   FROM python:3.8-slim
-
-   # Set the working directory
-   WORKDIR /app
-
-   # Install ODBC Driver 18 for SQL Server
-   RUN apt-get update && apt-get install -y \
-       curl apt-transport-https gnupg \
-       && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-       && curl https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/msprod.list \
-       && apt-get update && ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-
-   # Copy the current directory contents into the container at /app
-   COPY . /app
-
-   # Install any needed packages specified in requirements.txt
-   RUN pip install --no-cache-dir -r requirements.txt
-
-   # Set environment variables
-   COPY .env /app/.env
-   RUN export $(cat /app/.env | xargs)
-
-   # Make port 5000 available to the world outside this container
-   EXPOSE 5000
-
-   # Define the command to run the application
-   CMD ["python", "run.py"]
-   ```
-
-2. **Create `docker-compose.yml`:**
-
-   ```yaml
-   version: '3'
-   services:
-     web:
-       build: .
-       ports:
-         - "5000:5000"
-       environment:
-         - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
-   ```
-
-3. **Build and Run the Docker Container:**
-
+### Kubernetes
+1. Build the Docker image:
    ```bash
-   docker-compose up --build
+   docker build -t <your-acr-name>.azurecr.io/attendance-microservice:latest .
    ```
 
-   The application should now be running inside a Docker container, accessible at `http://localhost:5000`.
-
-## Deployment to Kubernetes
-
-1. **Prepare Kubernetes Manifest Files:**
-
-   Create a `deployment.yml` file:
-
-   ```yaml
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: attendance-microservice-deployment
-   spec:
-     replicas: 3
-     selector:
-       matchLabels:
-         app: attendance-microservice
-     template:
-       metadata:
-         labels:
-           app: attendance-microservice
-       spec:
-         containers:
-         - name: attendance-app-container
-           image: your-dockerhub-username/your-docker-image:latest
-           ports:
-           - containerPort: 5000
-           env:
-           - name: DB_CONNECTION_STRING
-             value: "your-database-connection-string"
-   ```
-
-   Create a `service.yml` file:
-
-   ```yaml
-   apiVersion: v1
-   kind: Service
-   metadata:
-     name: attendance-app-service
-   spec:
-     selector:
-       app: attendance-microservice
-     ports:
-       - protocol: TCP
-         port: 80
-         targetPort: 5000
-     type: LoadBalancer
-   ```
-
-2. **Deploy to Kubernetes:**
-
+2. Push the Docker image to Azure Container Registry (ACR):
    ```bash
-   kubectl apply -f deployment.yml
-   kubectl apply -f service.yml
+   docker push <your-acr-name>.azurecr.io/attendance-microservice:latest
    ```
 
-   Access the application via the external IP provided by the LoadBalancer.
+3. Apply the Kubernetes manifest files to deploy to AKS:
+   ```bash
+   kubectl apply -f kubernetes-deployment.yaml
+   ```
 
-## Monitoring
+### CI/CD with Azure DevOps
 
-To monitor logs in real-time:
+1. The CI/CD pipeline is defined in the `azure-pipelines.yml` file. The pipeline performs the following tasks:
+   - Builds the Docker image.
+   - Pushes the image to ACR.
+   - Deploys the container to AKS.
+  
+2. Terraform is used to provision Azure resources like AKS, ACR, and a resource group.
 
+3. For more details on setting up the CI/CD pipeline, refer to [this link](https://docs.microsoft.com/azure/devops/pipelines/).
+
+## Infrastructure
+
+Terraform is used to provision the following Azure resources:
+- **Resource Group**
+- **Azure Kubernetes Service (AKS)**
+- **Azure Container Registry (ACR)**
+  
+To deploy the infrastructure:
 ```bash
-kubectl logs -f -l app=attendance-microservice
+cd terraform
+terraform init
+terraform apply
 ```
 
-To monitor specific pods:
+## Environment Variables
+
+Ensure the following environment variables are configured:
 
 ```bash
-kubectl get pods
-kubectl logs -f <pod-name>
+DB_CONNECTION_STRING=your_azure_sql_db_connection_string
+ACR_NAME=your_acr_name
+AKS_CLUSTER_NAME=your_aks_cluster_name
 ```
 
-## Troubleshooting
+## API Documentation
 
-### Common Issues
+The REST API allows CRUD operations for managing staff attendance and users.
 
-- **ImagePullBackOff/Error ImagePull:**
-  Ensure the Docker image name is correct and pushed to Docker Hub or the correct registry.
-
-- **Application Not Accessible:**
-  Ensure the service type is correctly configured and the external IP is accessible.
-
-### Viewing Detailed Logs
-
-If your application fails, detailed logs can be viewed by running:
-
-```bash
-kubectl logs -f <pod-name>
-```
-
-For any further issues, please refer to the Kubernetes and Docker documentation or open an issue on this repository.
+### Endpoints:
+- **POST /register**: Register a new staff member.
+- **POST /login**: Login an existing staff member.
+- **POST /attendance**: Mark attendance for the logged-in user.
+- **GET /attendance**: Admin view for all attendance records.
+  
+You can explore the API using tools like [Postman](https://www.postman.com/) or [Swagger](https://swagger.io/).
 
 ## Contributing
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss your idea.
+Contributions are welcome! Please fork the repository and create a pull request for any feature additions or improvements.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
+## Links
+- **GitHub Repository**: [Link to the project repository](https://github.com/sanctitygeorge/user-attendance-microservice-api)
